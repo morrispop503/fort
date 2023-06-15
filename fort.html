@@ -1,0 +1,99 @@
+var container = document.getElementById("container");
+var player;
+var score = 0;
+var isGameOver = false;
+
+document.addEventListener("keydown", function(event) {
+    if (event.code === "ArrowRight") {
+        movePlayer("right");
+    } else if (event.code === "ArrowLeft") {
+        movePlayer("left");
+    }
+});
+
+function movePlayer(direction) {
+    if (isGameOver) {
+        return;
+    }
+
+    var playerLeft = parseInt(player.style.left);
+    if (direction === "right") {
+        player.style.left = playerLeft + 20 + "px";
+    } else if (direction === "left") {
+        player.style.left = playerLeft - 20 + "px";
+    }
+
+    checkCollision();
+}
+
+function createPlayer() {
+    player = document.createElement("div");
+    player.style.width = "20px";
+    player.style.height = "20px";
+    player.style.position = "absolute";
+    player.style.backgroundColor = "red";
+    player.style.top = "90px";
+    player.style.left = "0";
+
+    container.appendChild(player);
+}
+
+function createObstacle() {
+    if (isGameOver) {
+        return;
+    }
+
+    var obstacle = document.createElement("div");
+    obstacle.style.width = "20px";
+    obstacle.style.height = "20px";
+    obstacle.style.position = "absolute";
+    obstacle.style.backgroundColor = "blue";
+    obstacle.style.left = container.offsetWidth + "px";
+    obstacle.style.top = Math.random() * 180 + "px";
+
+    container.appendChild(obstacle);
+
+    var obstacleMoveInterval = setInterval(function() {
+        if (isGameOver) {
+            clearInterval(obstacleMoveInterval);
+            return;
+        }
+
+        var obstacleLeft = parseInt(obstacle.style.left);
+        obstacle.style.left = obstacleLeft - 2 + "px";
+
+        if (obstacleLeft < -20) {
+            container.removeChild(obstacle);
+            clearInterval(obstacleMoveInterval);
+            score++;
+            console.log("Score: " + score);
+        }
+
+        checkCollision();
+    }, 10);
+
+    setTimeout(createObstacle, 2000);
+}
+
+function checkCollision() {
+    var playerLeft = parseInt(player.style.left);
+    var obstacles = document.getElementsByClassName("obstacle");
+
+    for (var i = 0; i < obstacles.length; i++) {
+        var obstacle = obstacles[i];
+        var obstacleLeft = parseInt(obstacle.style.left);
+
+        if (playerLeft === obstacleLeft && player.offsetTop === obstacle.offsetTop) {
+            endGame();
+            break;
+        }
+    }
+}
+
+function endGame() {
+    isGameOver = true;
+    console.log("Game Over");
+}
+
+createPlayer();
+createObstacle();
